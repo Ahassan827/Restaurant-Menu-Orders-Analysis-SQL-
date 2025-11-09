@@ -14,13 +14,15 @@ FROM dbo.menu_items
 ---- What are the least and most expensive item
 
 SELECT *
+from(select top 1 item_name, price
 FROM dbo.menu_items
-order by price
-
-
+order by price Asc) AS CheapItem
+Union All
 SELECT *
+from(select top 1 item_name, price
 FROM dbo.menu_items
-order by price DESC
+order by price DESC) as HighItem
+
 
 ---- How many italian dishes are on the menu
 
@@ -55,7 +57,7 @@ group by category
 
 ---- what is the avg dish price within each category
 
-SELECT [category] , Avg(price) as [Avg_Price]
+SELECT category , Avg(price) as[Avg_Price
 from dbo.menu_items
 group by category
   
@@ -97,7 +99,7 @@ FROM dbo.order_details
 ---- Which order had the most number of items
 
 
-SELECT [order_id] , count(item_id) as [num_items]
+SELECT order_id , count(item_id) as num_items
 from dbo.order_details
 group by order_id
 order by num_items desc
@@ -109,7 +111,7 @@ order by num_items desc
 
 
 Select count(*) num_orders from
-(SELECT [order_id] , count(item_id) as [num_items]
+(SELECT order_id, count(item_id) as num_items
 from dbo.order_details
 group by order_id
 having count(item_id) >12) as num_orders
@@ -127,13 +129,24 @@ ON od.item_id = mi.menu_item_id;
 
 ----- What were the least and most order items & what category were they in
 
-SELECT item_name , category , count (order_details_id) as num_purchases
-FROM order_details od
-LEFT JOIN menu_items mi
-ON od.item_id = mi.menu_item_id
-GROUP BY item_name, category
-order by num_purchases desc
-
+With itemorders as(
+select mi.item_name , mi.category , count (order_details_id) as num_purchases
+from dbo.order_details od
+join dbo.menu_items mi
+on od.item_id = mi.menu_item_id
+GROUP BY mi.item_name, mi.category
+)
+Select*
+from(
+select top 1 *
+from itemorders
+order by num_purchases asc) as leastitem
+union all
+select *
+from(
+select top 1 *
+from itemorders
+order by num_purchases desc) as mostitem
 
 
 ----- What were the top 5 orders that spend the most mony
@@ -152,6 +165,6 @@ SELECT category , count(item_id) as num_items,order_id
 FROM order_details od
 LEFT JOIN menu_items mi
 ON od.item_id = mi.menu_item_id
-where order_id in (440 , 2075 , 1957 ,2675)
+where order_id = 440 
 group by category,order_id
 
