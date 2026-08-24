@@ -57,7 +57,7 @@ group by category
 
 ---- what is the avg dish price within each category
 
-SELECT category , Avg(price) as[Avg_Price
+SELECT category , round(Avg(price),2) as Avg_Price
 from dbo.menu_items
 group by category
   
@@ -68,6 +68,13 @@ group by category
 
 SELECT *
 FROM dbo.order_details
+
+
+CREATE INDEX IX_orderdetails_orderid
+ON order_details(order_id, item_id)
+
+CREATE INDEX IX_menuitems_itemid
+ON menu_items(menu_item_id, price, category)
 
 
 ---- What is the date range of the table
@@ -153,7 +160,7 @@ order by num_purchases desc) as mostitem
 
 SELECT top 5 order_id,sum(price) as total_spend
 FROM order_details od
-LEFT JOIN menu_items mi
+JOIN menu_items mi
 ON od.item_id = mi.menu_item_id
 group by order_id
 order by total_spend desc
@@ -163,7 +170,7 @@ order by total_spend desc
 
 SELECT category , count(item_id) as num_items,order_id
 FROM order_details od
-LEFT JOIN menu_items mi
+JOIN menu_items mi
 ON od.item_id = mi.menu_item_id
 where order_id = 440 
 group by category,order_id
